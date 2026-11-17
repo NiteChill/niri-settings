@@ -19,7 +19,7 @@ Singleton {
     // without it do: its settings hidden, the island page a showcase)
     readonly property bool noIsland: Quickshell.env("SETTINGS_NO_ISLAND") === "1"
     // where people get the Dynamic Island (the showcase's button); empty = "coming soon"
-    readonly property string islandHomepage: Quickshell.env("SETTINGS_ISLAND_URL") || ""
+    readonly property string islandHomepage: Quickshell.env("SETTINGS_ISLAND_URL") || "https://github.com/NiteChill/niri-island"
     // SETTINGS_DEV=1: show the developer pages (the component gallery)
     readonly property bool dev: Quickshell.env("SETTINGS_DEV") === "1"
     readonly property string sandbox: Quickshell.env("SETTINGS_SANDBOX") || ""

@@ -327,8 +327,12 @@ pages that say what's missing and offer to install it (Dependency check above).
    xfce4-terminal) before trusting Deps._terminals.
 2. Done 2026-11-17: a git repository (branch main, first commit), GPL-3.0-or-later (`LICENSE`, the
    user's choice), `THIRD-PARTY.md` crediting Material Symbols and HeroUI v3 (both Apache-2.0), a
-   `.gitignore` (Python bytecode, editor files). No remote yet: `gh` isn't installed; publishing on
-   GitHub (or elsewhere) is the next step of this one, and the user decides where.
+   `.gitignore` (Python bytecode, editor files). Published 2026-11-17 as
+   https://github.com/NiteChill/niri-settings (public, release v0.1.0), next to the island's
+   https://github.com/NiteChill/niri-island: two repositories (the user's choice), named with "niri"
+   (the user agreed: they're niri-only, and "Dynamic Island" is Apple's name). Commits use GitHub's
+   noreply address (the user's email would be public in the history). Each README explains how the two
+   work together; keep them in step when either changes what the other relies on.
 3. Font: Theme.qml asks for Google Sans Flex, which no distro ships. Fall back cleanly (check what Qt
    picks without it), or ship the font with the app if its licence allows (OFL: check).
 4. Ask before the first change to niri's config.kdl (the app appends `include optional=true
@@ -342,8 +346,7 @@ pages that say what's missing and offer to install it (Dependency check above).
    (niri and quickshell have none there today; pipewire-bin, libglib2.0-bin, glib2-tools, cups-client...).
 7. Fingerprints: without fprintd the section stays hidden, even on a laptop with a reader. Detecting a
    reader without fprintd (USB ids in udev?) would let the page offer it.
-8. The island's homepage (Env.islandHomepage, SETTINGS_ISLAND_URL) is empty until the island is
-   published: the showcase's "Get the Dynamic Island" button does nothing until then.
+8. Done: Env.islandHomepage is https://github.com/NiteChill/niri-island (SETTINGS_ISLAND_URL overrides).
 9. Default settings app: only Files' panels were checked (strings in Nautilus 50). Collect what other
    apps send (GNOME Shell isn't used here; gnome-software, GNOME Online Accounts, portals...) with
    `dbus-monitor --session "destination=org.gnome.Settings"` and add their panels to PANELS. Packages must
