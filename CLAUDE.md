@@ -272,8 +272,11 @@ work that augments the grade (checks, tests, CLAUDE.md, notify as usual).
   it on every start without asking): until then the notice at the top of the app (Niri.askInclude,
   Allow / Not now) and nothing written in niri's folder, not even settings.kdl; a change is shown but
   held (Niri.heldChange, its config.kdl edits in Niri._pendingMain) and saved on Allow; Not now undoes
-  it, and the next change asks again. Every write to config.kdl goes through Niri._writeMain. Tested in
-  a sandbox without the include (held, Not now, Allow; a held config.kdl edit). Non-merging blocks (input devices,
+  it, and the next change asks again. Every write to config.kdl goes through Niri._writeMain. Allow never
+  creates a missing config.kdl (a file holding only the include would replace niri's whole default
+  config: no shortcuts) and drops a held config.kdl edit if the file changed since (_pendingBase: the
+  person's own edits win). Tested in sandboxes: no include (held, Not now, Allow; a held config.kdl
+  edit), no config.kdl at all, and an edit made in a text editor while a change was held. Non-merging blocks (input devices,
   struts, preset widths, animations subsections) are copied from config.kdl before the first change.
   Wallpaper / idle / night light = the app's own `spawn-at-startup` lines (swaybg, swayidle, wlsunset)
   + a live restart.

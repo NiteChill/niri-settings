@@ -7,7 +7,9 @@ import Quickshell.Io
 //   config.kdl    the user's file. Read only, except for one line, `include optional=true "settings.kdl"`
 //                 at its end, which the app adds only once the person allows it (the notice at the top
 //                 of the app, App.qml: Allow / Not now). Until then nothing in niri's folder is written:
-//                 a change is shown but held (heldChange) and saved on Allow; Not now undoes it.
+//                 a change is shown but held (heldChange) and saved on Allow; Not now undoes it. Allow
+//                 never creates config.kdl (only the include in it would replace niri's whole default
+//                 config), and a held edit of config.kdl is dropped if the person edited the file since.
 //   settings.kdl  the app's file, written whole from `own`. Included last, so its values win; it only
 //                 holds what the user changed in the app.
 // Reading a setting: the app's value, else config.kdl's, else niri's default (the caller's `def`).
@@ -31,12 +33,29 @@ Singleton {
     property bool _dismissed: false
     // config.kdl's new text from a held change that edits it (a line turned off, a shortcut taken back)
     property string _pendingMain: ""
+    // config.kdl's text when that held edit was made: if the person edits the file before allowing, their
+    // version wins and the held edit is dropped (the app's own file still gets the change)
+    property string _pendingBase: ""
+    // config.kdl exists (a new niri user may not have one yet: niri then runs on its built-in config)
+    property bool _mainExists: false
     property bool _ownExists: false
     // the notice asking to add the include: until answered, and again when a change needs it
     readonly property bool askInclude: ready && !included && (!_dismissed || heldChange)
     function allowInclude() {
-        _ensureInclude(_pendingMain !== "" ? _pendingMain : mainFile.text());
+        // never create config.kdl: a file holding only the include would replace niri's whole default
+        // config (no shortcuts at all)
+        if (!_mainExists) {
+            lastError = "no config.kdl to add the include to";
+            console.warn("Niri: " + Env.niriConfig + " doesn't exist: nothing written");
+            return;
+        }
+        const current = mainFile.text();
+        const held = _pendingMain !== "" && _pendingBase === current;
+        if (_pendingMain !== "" && !held)
+            console.warn("Niri: config.kdl changed since the held edit: kept the file as it is now");
+        _ensureInclude(held ? _pendingMain : current);
         _pendingMain = "";
+        _pendingBase = "";
         included = true;
         _dismissed = false;
         // the app's own file, so niri doesn't warn about a missing include
@@ -53,6 +72,7 @@ Singleton {
     function declineInclude() {
         _dismissed = true;
         _pendingMain = "";
+        _pendingBase = "";
         if (heldChange) {
             heldChange = false;
             if (_previous !== null) {
@@ -65,6 +85,8 @@ Singleton {
     // a change to config.kdl itself: written once the include is allowed, held until then
     function _writeMain(text) {
         if (!included) {
+            if (_pendingMain === "")
+                _pendingBase = mainFile.text();
             _pendingMain = text;
             heldChange = true;
             _dismissed = false;
@@ -282,7 +304,7 @@ Singleton {
         });
         if (done) {
             _writeMain(lines.join("\n"));
-            console.warn("Niri: commented out " + name + " in " + Env.niriConfig);
+            console.warn("Niri: commented out " + name + " in " + Env.niriConfig + (included ? "" : " (held until the include is allowed)"));
         }
     }
     // a section's `on` / `off` child
@@ -437,6 +459,7 @@ Singleton {
         watchChanges: true
         onFileChanged: reload()
         onLoaded: {
+            niri._mainExists = true;
             try {
                 niri.main = Kdl.parse(text());
             } catch (e) {
@@ -448,7 +471,10 @@ Singleton {
             niri.ready = true;
             niri.readOutputs();
         }
-        onLoadFailed: niri.ready = true
+        onLoadFailed: {
+            niri._mainExists = false;
+            niri.ready = true;
+        }
     }
     FileView {
         id: ownFile
