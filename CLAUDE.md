@@ -267,8 +267,13 @@ work that augments the grade (checks, tests, CLAUDE.md, notify as usual).
   sandbox), Niri.set / setFlag / setOnOff / setBlock / setOutput / setBind / replaceNodes, Desktop.set,
   Island.set, Hw.*, Host.*. Reads may use Env.read.
 - **niri**: the app writes only `settings.kdl` (whole file from `Niri.own`, validated with `niri validate`
-  first; a rejected change is undone and shown). On start it appends `include optional=true "settings.kdl"`
-  to config.kdl if missing (the user asked: every time, no prompt). Non-merging blocks (input devices,
+  first; a rejected change is undone and shown). config.kdl gets `include optional=true "settings.kdl"`
+  at its end only once the person allows it (2026-11-17, for the public release; before, the app added
+  it on every start without asking): until then the notice at the top of the app (Niri.askInclude,
+  Allow / Not now) and nothing written in niri's folder, not even settings.kdl; a change is shown but
+  held (Niri.heldChange, its config.kdl edits in Niri._pendingMain) and saved on Allow; Not now undoes
+  it, and the next change asks again. Every write to config.kdl goes through Niri._writeMain. Tested in
+  a sandbox without the include (held, Not now, Allow; a held config.kdl edit). Non-merging blocks (input devices,
   struts, preset widths, animations subsections) are copied from config.kdl before the first change.
   Wallpaper / idle / night light = the app's own `spawn-at-startup` lines (swaybg, swayidle, wlsunset)
   + a live restart.
@@ -346,10 +351,11 @@ pages that say what's missing and offer to install it (Dependency check above).
    (the user agreed: they're niri-only, and "Dynamic Island" is Apple's name). Commits use GitHub's
    noreply address (the user's email would be public in the history). Each README explains how the two
    work together; keep them in step when either changes what the other relies on.
-3. Font: Theme.qml asks for Google Sans Flex, which no distro ships. Fall back cleanly (check what Qt
-   picks without it), or ship the font with the app if its licence allows (OFL: check).
-4. Ask before the first change to niri's config.kdl (the app appends `include optional=true
-   "settings.kdl"` on start): a one-time notice explaining it, in the user's words (no "KDL", no paths).
+3. Done 2026-11-17: the font. This app follows the desktop's interface font (Theme.font from
+   font-name), Google Sans Flex only when none is set; without it fontconfig picks the system's sans
+   (Noto Sans on Fedora, checked with a fontconfig that hides ~/.local/share/fonts). The island ships
+   Google Sans Flex itself (OFL 1.1, in its assets/fonts).
+4. Done 2026-11-17: the notice before config.kdl is touched (see Rules > niri).
 5. Packages: an AUR package first (most niri users are on Arch), then a Fedora COPR next to Quickshell's,
    maybe a Nix flake. Needed checks in the doctor = hard dependencies, features = optional ones (the
    doctor's CHECKS is the list). Installed under /usr/share/settings-app with bin/settings on PATH; make

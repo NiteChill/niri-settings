@@ -1,7 +1,8 @@
 import QtQuick
 import "../theme"
 
-// HeroUI's Alert: a soft tinted box with an icon, a title and a line of explanation, optionally a button.
+// HeroUI's Alert: a soft tinted box with an icon, a title and a line of explanation, optionally a button
+// (actionText), and a quieter second one before it (secondaryText, e.g. "Not now").
 // tone: "accent" (info), "success", "warning", "danger", "default".
 Rectangle {
     id: banner
@@ -11,7 +12,10 @@ Rectangle {
     property string description
     property string iconName: tone === "danger" ? "error-fill" : tone === "warning" ? "error-fill" : tone === "success" ? "check" : "info-fill"
     property string actionText
+    property string actionVariant: "tertiary"
+    property string secondaryText
     signal action
+    signal secondary
 
     readonly property color fg: tone === "danger" ? Theme.c.danger : tone === "warning" ? Theme.c.warning : tone === "success" ? Theme.c.success : tone === "default" ? Theme.c.muted : Theme.c.accent
 
@@ -24,7 +28,7 @@ Rectangle {
         id: row
         x: Theme.spacing * 4
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width - x * 2 - (button.visible ? button.width + Theme.spacing * 3 : 0)
+        width: parent.width - x * 2 - (button.visible ? button.width + Theme.spacing * 3 : 0) - (second.visible ? second.width + Theme.spacing * 2 : 0)
         spacing: Theme.spacing * 3
         Icon {
             name: banner.iconName
@@ -52,13 +56,24 @@ Rectangle {
         }
     }
     Button {
+        id: second
+        visible: banner.secondaryText !== ""
+        anchors.right: button.visible ? button.left : parent.right
+        anchors.rightMargin: button.visible ? Theme.spacing * 2 : Theme.spacing * 3
+        anchors.verticalCenter: parent.verticalCenter
+        size: "sm"
+        variant: "ghost"
+        text: banner.secondaryText
+        onClicked: banner.secondary()
+    }
+    Button {
         id: button
         visible: banner.actionText !== ""
         anchors.right: parent.right
         anchors.rightMargin: Theme.spacing * 3
         anchors.verticalCenter: parent.verticalCenter
         size: "sm"
-        variant: "tertiary"
+        variant: banner.actionVariant
         text: banner.actionText
         onClicked: banner.action()
     }

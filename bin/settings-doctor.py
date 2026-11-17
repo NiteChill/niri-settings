@@ -119,8 +119,6 @@ CHECKS = [
     {"id": "playerctl", "name": "playerctl", "pages": ["Keyboard > Shortcuts (music keys)"], "package": pkg("playerctl")},
     {"id": "gi", "name": "PyGObject", "pages": ["other apps' settings buttons (Files' Trash Settings...) opening this app"],
      "package": pkg("python3-gobject", arch="python-gobject", debian="python3-gi")},
-    {"id": "font", "name": "the Google Sans Flex font", "pages": ["the app's look (another font is used without it)"],
-     "package": pkg(""), "url": "https://fonts.google.com/specimen/Google+Sans+Flex"},
     {"id": "island", "name": "the Dynamic Island", "pages": ["Dynamic Island", "Search", "island settings on other pages"],
      "package": pkg(""), "url": ""},
 ]
@@ -247,11 +245,6 @@ def has_battery():
         return False
 
 
-def has_font(family):
-    code, out = run(["fc-list", ":", "family"])
-    return code == 0 and any(family.lower() in line.lower() for line in out.splitlines())
-
-
 def island_dir():
     return os.environ.get("ISLAND_DIR") or os.path.expanduser("~/.config/quickshell")
 
@@ -334,10 +327,6 @@ def probe(check, quick=False):
         return not cmds, False, ("missing: " + ", ".join(cmds)) if cmds else ""
     if i == "fontconfig":
         return has("fc-list"), False, "" if has("fc-list") else "not installed"
-    if i == "font":
-        if not has("fc-list"):
-            return False, True, "needs fontconfig first"
-        return has_font("Google Sans Flex"), False, "" if has_font("Google Sans Flex") else "not installed"
     if i == "gi":
         code, _ = run(["python3", "-c", "import gi; gi.require_version('Gio', '2.0'); from gi.repository import Gio"])
         return code == 0, False, "" if code == 0 else "not installed"

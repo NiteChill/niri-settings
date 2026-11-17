@@ -84,9 +84,8 @@ Used by some pages (each page says when something is missing, and offers to inst
 | Fonts, default apps | `fontconfig`, `xdg-utils` | `fontconfig`, `xdg-utils` |
 | Opening from other apps' settings buttons | `python3-gobject` | `python-gobject` |
 
-Optional: the **Google Sans Flex** font
-([Google Fonts](https://fonts.google.com/specimen/Google+Sans+Flex)) for the island's matching look,
-and [niri-island](https://github.com/NiteChill/niri-island).
+Optional: [niri-island](https://github.com/NiteChill/niri-island). The app uses your desktop's
+interface font (Appearance > Text and icons).
 
 `settings --doctor` lists what your computer has and lacks, with the package names for Fedora, Arch,
 Debian / Ubuntu and openSUSE.
@@ -100,8 +99,11 @@ git clone https://github.com/NiteChill/niri-settings ~/.local/share/niri-setting
 
 It shows up as **Settings** in your app launcher (with Wi-Fi, Bluetooth, Displays, Sound and Dynamic
 Island as quick actions) and adds a `settings` command (`settings wifi` opens a page). It ends with
-`settings --doctor`. On its first start the app adds one line at the end of
-`~/.config/niri/config.kdl` that includes its own `settings.kdl`.
+`settings --doctor`.
+
+The app keeps your niri choices in a file of its own, `~/.config/niri/settings.kdl`, which needs one
+line at the end of your `config.kdl`. It asks before adding it (a notice at the top of the window,
+Allow / Not now), and writes nothing in niri's folder until you allow it.
 
 To try it without installing: `qs -p ~/.local/share/niri-settings`.
 

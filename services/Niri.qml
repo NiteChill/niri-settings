@@ -4,8 +4,10 @@ import Quickshell
 import Quickshell.Io
 
 // niri's config, as the app sees it.
-//   config.kdl    the user's file. Read only, except for one line: on start the app makes sure it ends
-//                 with `include optional=true "settings.kdl"` (appended if missing, every time).
+//   config.kdl    the user's file. Read only, except for one line, `include optional=true "settings.kdl"`
+//                 at its end, which the app adds only once the person allows it (the notice at the top
+//                 of the app, App.qml: Allow / Not now). Until then nothing in niri's folder is written:
+//                 a change is shown but held (heldChange) and saved on Allow; Not now undoes it.
 //   settings.kdl  the app's file, written whole from `own`. Included last, so its values win; it only
 //                 holds what the user changed in the app.
 // Reading a setting: the app's value, else config.kdl's, else niri's default (the caller's `def`).
@@ -22,6 +24,55 @@ Singleton {
     property int revision: 0
     property string lastError: ""
     property bool ready: false
+    // config.kdl includes the app's file (else nothing is written: see the notice)
+    property bool included: false
+    // a change waits for the include (shown in the app, not saved yet)
+    property bool heldChange: false
+    property bool _dismissed: false
+    // config.kdl's new text from a held change that edits it (a line turned off, a shortcut taken back)
+    property string _pendingMain: ""
+    property bool _ownExists: false
+    // the notice asking to add the include: until answered, and again when a change needs it
+    readonly property bool askInclude: ready && !included && (!_dismissed || heldChange)
+    function allowInclude() {
+        _ensureInclude(_pendingMain !== "" ? _pendingMain : mainFile.text());
+        _pendingMain = "";
+        included = true;
+        _dismissed = false;
+        // the app's own file, so niri doesn't warn about a missing include
+        if (!_ownExists) {
+            _writing = true;
+            ownFile.setText(header);
+            _ownExists = true;
+        }
+        if (heldChange) {
+            heldChange = false;
+            save();
+        }
+    }
+    function declineInclude() {
+        _dismissed = true;
+        _pendingMain = "";
+        if (heldChange) {
+            heldChange = false;
+            if (_previous !== null) {
+                own = _previous;
+                _previous = null;
+                revision++;
+            }
+        }
+    }
+    // a change to config.kdl itself: written once the include is allowed, held until then
+    function _writeMain(text) {
+        if (!included) {
+            _pendingMain = text;
+            heldChange = true;
+            _dismissed = false;
+            return;
+        }
+        mainWriter.path = Env.niriConfig;
+        mainWriter.setText(text);
+    }
     // [{ name, make, model, serial, modes: [{ width, height, refresh (Hz), preferred }], mode (index),
     //    x, y, width, height (logical), scale, transform, vrrSupported, vrrEnabled, enabled }]
     property var outputs: []
@@ -200,7 +251,7 @@ Singleton {
     function _uncommentMain(path) {
         const name = path[path.length - 1];
         let done = 0;
-        const lines = mainFile.text().split("\n").map(l => {
+        const lines = (_pendingMain !== "" ? _pendingMain : mainFile.text()).split("\n").map(l => {
             const m = l.match(/^(\s*)\/\/ (.*) \/\/ turned off in Settings$/);
             if (m && (m[2] === name || m[2].startsWith(name + " ") || m[2].startsWith(name + ";"))) {
                 done++;
@@ -210,8 +261,7 @@ Singleton {
         });
         if (!done)
             return false;
-        mainWriter.path = Env.niriConfig;
-        mainWriter.setText(lines.join("\n"));
+        _writeMain(lines.join("\n"));
         // the line is back in config.kdl: config.kdl wins unless the app's file also says it
         remove(path);
         return true;
@@ -222,7 +272,7 @@ Singleton {
         const name = path[path.length - 1];
         const re = new RegExp("^(\\s*)(" + name.replace(/-/g, "\\-") + ")(\\s|;|$)");
         let done = 0;
-        const lines = mainFile.text().split("\n").map(l => {
+        const lines = (_pendingMain !== "" ? _pendingMain : mainFile.text()).split("\n").map(l => {
             // one-line nodes only: a line opening a block is left alone
             if (re.test(l) && l.indexOf("{") < 0) {
                 done++;
@@ -231,8 +281,7 @@ Singleton {
             return l;
         });
         if (done) {
-            mainWriter.path = Env.niriConfig;
-            mainWriter.setText(lines.join("\n"));
+            _writeMain(lines.join("\n"));
             console.warn("Niri: commented out " + name + " in " + Env.niriConfig);
         }
     }
@@ -288,7 +337,7 @@ Singleton {
     // lines (an included file can't take a key back from config.kdl)
     function removeBind(key) {
         setBind(key, null);
-        const lines = mainFile.text().split("\n");
+        const lines = (_pendingMain !== "" ? _pendingMain : mainFile.text()).split("\n");
         const re = new RegExp("^(\\s*)" + key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(\\s|\\{)", "i");
         let inBinds = false, depth = 0, done = false;
         for (let i = 0; i < lines.length && !done; i++) {
@@ -311,10 +360,8 @@ Singleton {
             } while (open > 0 && j < lines.length);
             done = true;
         }
-        if (done) {
-            mainWriter.path = Env.niriConfig;
-            mainWriter.setText(lines.join("\n"));
-        }
+        if (done)
+            _writeMain(lines.join("\n"));
     }
     function setBind(key, actionNode, props) {
         const saved = own;
@@ -346,6 +393,11 @@ Singleton {
     property bool _saveAgain: false
     property int _checks: 0
     function save() {
+        if (!included) {
+            heldChange = true;
+            _dismissed = false;
+            return;
+        }
         if (_saving) {
             _saveAgain = true;
             return;
@@ -392,7 +444,7 @@ Singleton {
                 niri.main = [];
             }
             niri.revision++;
-            niri._ensureInclude(text());
+            niri.included = niri._hasInclude(text());
             niri.ready = true;
             niri.readOutputs();
         }
@@ -411,6 +463,7 @@ Singleton {
                 reload();
         }
         onLoaded: {
+            niri._ownExists = true;
             try {
                 niri.own = Kdl.parse(text());
             } catch (e) {
@@ -421,7 +474,7 @@ Singleton {
         onSaved: Qt.callLater(niri.readOutputs)
         // no file yet: start one, so niri doesn't warn about a missing include on every reload
         onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound) {
+            if (error === FileViewError.FileNotFound && niri.included) {
                 // after this failed read has finished
                 Qt.callLater(() => {
                     niri._writing = true;
@@ -431,11 +484,14 @@ Singleton {
         }
     }
 
-    // config.kdl must end by including the app's file: checked every time the app opens (and whenever
-    // config.kdl changes while it runs). A commented-out include doesn't count.
+    // config.kdl includes the app's file: checked when it's read (on start, and whenever it changes). A
+    // commented-out include doesn't count.
+    function _hasInclude(text) {
+        return text.split("\n").some(l => /^\s*include\s+(optional=(true|#true)\s+)?"(\.\/)?settings\.kdl"/.test(l));
+    }
+    // add the include at the end of config.kdl (only from allowInclude: the person said yes)
     function _ensureInclude(text) {
-        const has = text.split("\n").some(l => /^\s*include\s+(optional=(true|#true)\s+)?"(\.\/)?settings\.kdl"/.test(l));
-        if (has)
+        if (_hasInclude(text))
             return;
         const add = (text.endsWith("\n") ? "" : "\n") + "\n// Settings app: its choices live in settings.kdl and win over the lines above.\ninclude optional=true \"settings.kdl\"\n";
         mainWriter.path = Env.niriConfig;

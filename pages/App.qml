@@ -316,11 +316,29 @@ Item {
             }
         }
 
+        // before anything is written in niri's folder: may the app add its one line to the desktop's
+        // configuration? (Niri.askInclude; changes made before the answer wait, Niri.heldChange)
+        Banner {
+            id: includeNotice
+            visible: Niri.askInclude
+            x: Math.max(app.gutter, (parent.width - app.contentWidth) / 2)
+            y: header.height
+            width: Math.min(app.contentWidth, parent.width - 2 * app.gutter)
+            tone: "accent"
+            title: Niri.heldChange ? "Your change is waiting for your permission" : "Let Settings change your desktop?"
+            description: "Settings keeps the choices you make here (windows, mouse, keyboard, displays, appearance) in a file of its own. To use it, it adds one line to your desktop's configuration. Nothing you have set yourself is changed, and you can remove that line at any time." + (Niri.heldChange ? " Not now undoes your change." : "")
+            actionText: "Allow"
+            actionVariant: "primary"
+            secondaryText: "Not now"
+            onAction: Niri.allowInclude()
+            onSecondary: Niri.declineInclude()
+            z: 2
+        }
         Banner {
             id: niriError
             visible: Niri.lastError !== "" && app.page !== "displays"
             x: Math.max(app.gutter, (parent.width - app.contentWidth) / 2)
-            y: header.height
+            y: header.height + (includeNotice.visible ? includeNotice.height + Theme.spacing * 2 : 0)
             width: Math.min(app.contentWidth, parent.width - 2 * app.gutter)
             tone: "danger"
             title: "That change couldn't be saved"
@@ -331,7 +349,7 @@ Item {
         }
         Flickable {
             id: scroller
-            y: header.height + (niriError.visible ? niriError.height + Theme.spacing * 2 : 0)
+            y: header.height + (includeNotice.visible ? includeNotice.height + Theme.spacing * 2 : 0) + (niriError.visible ? niriError.height + Theme.spacing * 2 : 0)
             width: parent.width
             height: parent.height - y
             contentHeight: loader.height + app.gutter * 2
