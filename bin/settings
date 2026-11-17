@@ -1,0 +1,18 @@
+#!/bin/sh
+# Opens the settings app, on a page when given (`settings wifi`, `settings island`), scrolled to a
+# setting when given too (`settings sound "Volume mixer"`).
+# Already open: brings that window forward instead of starting a second one.
+# `settings --index`: every setting, as JSON (bin/settings-index.py), for the island's launcher.
+# `settings --doctor [--json]`: what this computer has and lacks for the app (bin/settings-doctor.py).
+dir=$(dirname "$(dirname "$(readlink -f "$0")")")
+[ "$1" = "--index" ] && exec python3 "$dir/bin/settings-index.py"
+[ "$1" = "--doctor" ] && shift && exec python3 "$dir/bin/settings-doctor.py" "$@"
+page=${1:-}
+setting=${2:-}
+qs ipc -p "$dir" call settings open "$page" "$setting" >/dev/null 2>&1 && exit 0
+# The path also goes in QS_CONFIG_PATH: if the app ever crashes, Quickshell restarts it with no
+# arguments, and without this it would start the default config (the island) a second time instead.
+# The app clears it for everything it launches (services/Env.qml).
+# Apps' icons come from the desktop's icon theme (Appearance > Icons), read as the app starts.
+icons=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'")
+QS_ICON_THEME=${icons:-$QS_ICON_THEME} QS_CONFIG_PATH=$dir SETTINGS_PAGE=$page SETTINGS_SETTING=$setting exec qs -n -p "$dir"

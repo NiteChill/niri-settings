@@ -1,0 +1,34 @@
+[Desktop Entry]
+Type=Application
+Name=Settings
+GenericName=System Settings
+Comment=Wi-Fi, displays, sound, windows, the island and the rest of your desktop
+Exec=@BIN@
+Icon=settings-app
+Terminal=false
+Categories=Settings;DesktopSettings;
+Keywords=preferences;control;configuration;wifi;network;bluetooth;display;monitor;sound;audio;power;battery;wallpaper;appearance;theme;niri;island;keyboard;mouse;touchpad;printer;accessibility;privacy;time;language;user;
+StartupNotify=true
+StartupWMClass=settings-app
+SingleMainWindow=true
+Actions=wifi;bluetooth;displays;sound;island;
+
+[Desktop Action wifi]
+Name=Wi-Fi
+Exec=@BIN@ wifi
+
+[Desktop Action bluetooth]
+Name=Bluetooth
+Exec=@BIN@ bluetooth
+
+[Desktop Action displays]
+Name=Displays
+Exec=@BIN@ displays
+
+[Desktop Action sound]
+Name=Sound
+Exec=@BIN@ sound
+
+[Desktop Action island]
+Name=Dynamic Island
+Exec=@BIN@ island

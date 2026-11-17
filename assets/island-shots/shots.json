@@ -1,0 +1,68 @@
+{
+ "scale": 2,
+ "shots": [
+  {
+   "name": "rest",
+   "caption": "At rest, it shows the time and what matters",
+   "file": "rest.png",
+   "x": 0.17,
+   "y": 3,
+   "w": 176.34,
+   "h": 38
+  },
+  {
+   "name": "search",
+   "caption": "Press Super + Space to find apps, files, settings and the web",
+   "file": "search.png",
+   "x": 0,
+   "y": 3,
+   "w": 540,
+   "h": 220
+  },
+  {
+   "name": "notification",
+   "caption": "Notifications arrive softly, right where you look",
+   "file": "notification.png",
+   "x": 0,
+   "y": 3,
+   "w": 380,
+   "h": 82
+  },
+  {
+   "name": "media",
+   "caption": "Your music: the song, its cover and its controls",
+   "file": "media.png",
+   "x": 0,
+   "y": 3,
+   "w": 350,
+   "h": 193
+  },
+  {
+   "name": "battery",
+   "caption": "The battery, with how long it lasts",
+   "file": "battery.png",
+   "x": 0,
+   "y": 3,
+   "w": 350,
+   "h": 232.56
+  },
+  {
+   "name": "quickSettings",
+   "caption": "Quick settings: Wi-Fi, Bluetooth, Focus, sound, brightness",
+   "file": "quickSettings.png",
+   "x": 0,
+   "y": 3,
+   "w": 350,
+   "h": 197
+  },
+  {
+   "name": "time",
+   "caption": "The time, the day and the week",
+   "file": "time.png",
+   "x": 0,
+   "y": 3,
+   "w": 350,
+   "h": 242.56
+  }
+ ]
+}
