@@ -6,7 +6,7 @@ what people get: it places them over the viewer's wallpaper. Run it again whenev
 changes:   python3 tools/capture-island.py [island folder, default ~/.config/quickshell]
 
 How: the island is copied to a temporary folder and staged there (never the real one): a fixed clock
-(9:41), a neutral Wi-Fi name ("Home"), a made-up song and message with generated pictures; Focus only
+(9:41), neutral Wi-Fi and Bluetooth names ("Home", "Buds"), a made-up song and message with generated pictures; Focus only
 inside the copy; no sounds, no alerts of its own, nothing run. It opens each state, waits for the island
 to settle, and grabs it. Output: assets/island-shots/<name>.png + shots.json [{name, caption, file, x
 (centre offset), y, w, h}]. The copy shows on screen for ~20 s.
@@ -76,6 +76,8 @@ def main():
           "readonly property date time: new Date(2026, 0, 1, 9, 41)")
     patch(sys_qml, '"ssid": _wifiActive ? (_wifiActive.ssid || _wifiActive.name || "") : "",', '"ssid": _wifiActive ? "Home" : "",')
     patch(sys_qml, '"name": _wifiActive ? (_wifiActive.name || "") : "",', '"name": _wifiActive ? "Home" : "",')
+    # the connected Bluetooth device's name is the viewer's own (their headphones): a neutral one
+    patch(sys_qml, '"name": connected.length > 0 ? connected[0].name : "",', '"name": connected.length > 0 ? "Buds" : "",')
     patch(sys_qml, """        systemFocus = on;
         run(["gsettings", "set", "org.gnome.desktop.notifications", "show-banners", on ? "false" : "true"]);""",
           """        systemFocus = on;""")

@@ -249,6 +249,19 @@ work that augments the grade (checks, tests, CLAUDE.md, notify as usual).
 - Not the app's to follow: pointer, keyboard repeat, natural scrolling, cursor size / theme (the compositor
   applies them to every window), window title bars (the app draws none).
 
+## README images (2026-11-17)
+- The READMEs show the apps first (the user: "this is what people will look for first"):
+  docs/<page>.png here (Appearance on top, then Displays, Mouse & Touchpad, Keyboard, Accessibility,
+  the Dynamic Island page) and the island's docs/hero.png + panels.png.
+- Remake them when the look changes: `python3 tools/capture-island.py` (island stills, staged: 9:41,
+  Wi-Fi "Home", Bluetooth "Buds", a made-up song and message), then `python3 tools/readme-images.py`
+  (composes the island over demo wallpapers, photographs this app's pages in a sandbox in a real
+  window, ~25 s on screen, hover off, framed). Both show briefly on screen.
+- Nothing personal in them: pages that show this computer's surroundings are left out (Wi-Fi networks
+  nearby, Bluetooth / sound device names, the user's name); hardware models are fine. Check every new
+  shot before committing it. The island's connected Bluetooth name was real ("Atom") until the
+  capture staged it.
+
 ## Rules
 - **Writes go through the services**, never a Process in a page: Env.write (logged instead of run in the
   sandbox), Niri.set / setFlag / setOnOff / setBlock / setOutput / setBind / replaceNodes, Desktop.set,

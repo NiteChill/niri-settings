@@ -5,9 +5,9 @@
    "name": "rest",
    "caption": "At rest, it shows the time and what matters",
    "file": "rest.png",
-   "x": 0.17,
+   "x": -0.13,
    "y": 3,
-   "w": 176.34,
+   "w": 213.74,
    "h": 38
   },
   {
@@ -26,7 +26,7 @@
    "x": 0,
    "y": 3,
    "w": 380,
-   "h": 82
+   "h": 70
   },
   {
    "name": "media",
@@ -44,7 +44,7 @@
    "x": 0,
    "y": 3,
    "w": 350,
-   "h": 232.56
+   "h": 215.56
   },
   {
    "name": "quickSettings",

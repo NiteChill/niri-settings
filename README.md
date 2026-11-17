@@ -6,6 +6,8 @@ Settings is for GNOME. Built with [Quickshell](https://quickshell.org) (QML).
 
 It is a community project, not part of niri.
 
+![The Appearance page: light or dark, accent colour, wallpaper](docs/appearance.png)
+
 ## What it does
 
 Pages: **Wi-Fi**, **Network** (wired, VPN, proxy), **Bluetooth**, **Displays** (resolution, scale,
@@ -30,6 +32,11 @@ accent colour, wallpaper, gaps, corners, borders, shadows, blur, fonts, icons, c
 - Pages say what's missing on your computer (no Bluetooth service, no printer support...) and offer to
   install it.
 
+| | |
+|---|---|
+| ![Displays](docs/displays.png) | ![Mouse & Touchpad](docs/mouse.png) |
+| ![Keyboard](docs/keyboard.png) | ![Accessibility](docs/accessibility.png) |
+
 ## Works with niri-island
 
 [niri-island](https://github.com/NiteChill/niri-island) is a Dynamic Island-style top bar for niri,
@@ -46,6 +53,10 @@ made to go with this app. Each works without the other; together:
   brightness keys) next to niri's.
 
 Without the island, its options are hidden and the Dynamic Island page shows what it is.
+
+![The Dynamic Island page](docs/island.png)
+
+![niri-island: at rest, music, quick settings, time](https://raw.githubusercontent.com/NiteChill/niri-island/main/docs/hero.png)
 
 ## What you need
 
@@ -113,6 +124,8 @@ If you move the folder, run `install.sh` again.
 - `bin/settings`, `data/` (desktop entry, icon), `install.sh`: the app as an installed app.
   `bin/settings-doctor.py`: the dependency check.
 - `inventory.md`: every setting the app covers, and where it's stored.
+- `tools/capture-island.py`, then `tools/readme-images.py`: the README images of both projects (the
+  island staged with made-up data, this app in a sandbox).
 
 Test without touching your system: `SETTINGS_SANDBOX=<dir>` with copies of niri's config in
 `<dir>/niri` and the island's in `<dir>/island` (changes are logged, not applied), and
